@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Астрономические инструменты</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <button class="explore-btn" onclick="window.location.href='/'">Explore ▼</button>
+    </div>
+
+    <div class="main-content">
+        <div class="search-calc-section">
+            <input type="text" class="search-bar" placeholder="...">
+            <button class="calculation-btn" onclick="window.location.href='/calculation'">
+                Расчёт <span class="calculation-count">{{if .TotalCalculations}}{{.TotalCalculations}}{{else}}0{{end}}</span>
+            </button>
+        </div>
+        
+        <div class="instruments-grid">
+        {{range .Instruments}}
+        <div class="instrument-card">
+            <div class="instrument-image">
+                {{if .ImageURL}}
+                    <img src="{{.ImageURL}}" alt="{{.Instrument.Name}}" style="width: 100%; height: 100%; object-fit: cover;">
+                {{else}}
+                    {{.Instrument.Name}}
+                {{end}}
+            </div>
+            <div class="instrument-content">
+                <div class="instrument-title">{{.Instrument.Name}}</div>
+                <div class="instrument-actions">
+                    <button class="action-btn" onclick="window.location.href='/instrument/{{.Instrument.ID}}'">
+                        Add <span class="arrow"></span>
+                    </button>
+                    <button class="action-btn" onclick="window.location.href='/instrument/{{.Instrument.ID}}'">
+                        About <span class="arrow"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{end}}
+        </div>
+    </div>
+</body>
+</html>

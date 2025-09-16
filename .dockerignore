@@ -1,0 +1,13 @@
+# Игнорируем ненужные файлы при сборке Docker образа
+.git
+.gitignore
+README.md
+MINIO_SETUP.md
+*.md
+docker-compose*.yml
+Dockerfile
+.dockerignore
+main.exe
+*.log
+
+

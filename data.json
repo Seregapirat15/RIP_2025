@@ -1,0 +1,118 @@
+{
+  "instruments": [
+    {
+      "id": 1,
+      "name": "HARPS",
+      "full_name": "HARPS(High Accuracy Radial velocity Planet Searcher)",
+      "type": "ground",
+      "description": "Один из самых продуктивных спектографов. Обнаружил множество экзопланет, включая планеты земного типа",
+      "accuracy": 0.97,
+      "accuracy_unit": "м/с (3.5 км/ч)",
+      "location": "3.6-м телескоп, Обсерватория Ла-Силья (ESO, Чили)",
+      "status": "Активен",
+      "launch_date": "2003",
+      "measurement_range": "Видимый свет",
+      "resolution": "Высокое (до 115 000)",
+      "calibration": "Торий-аргонная лампа",
+      "stability": "Вакуумная камера с температурным контролем ±0.01 °С",
+      "instrument_type": "Эшелле-спектрограф второго поколения",
+      "image": "harps.jpg"
+    },
+    {
+      "id": 2,
+      "name": "James Webb",
+      "full_name": "James Webb Space Telescope (JWST)",
+      "type": "space",
+      "description": "Космический телескоп нового поколения для изучения экзопланет и их атмосфер",
+      "accuracy": 0.1,
+      "accuracy_unit": "м/с",
+      "location": "Точка Лагранжа L2",
+      "status": "Активен",
+      "launch_date": "2021",
+      "measurement_range": "Инфракрасный спектр",
+      "resolution": "Очень высокое (до 2700)",
+      "calibration": "Встроенные эталоны",
+      "stability": "Криогенное охлаждение до 7K",
+      "instrument_type": "Космический инфракрасный телескоп",
+      "image": "james_webb.jpg"
+    },
+    {
+      "id": 3,
+      "name": "ESPRESSO",
+      "full_name": "ESPRESSO (Echelle SPectrograph for Rocky Exoplanet and Stable Spectroscopic Observations)",
+      "type": "ground",
+      "description": "Сверхстабильный спектрограф для поиска землеподобных экзопланет",
+      "accuracy": 0.1,
+      "accuracy_unit": "м/с",
+      "location": "VLT, Параналь, Чили",
+      "status": "Активен",
+      "launch_date": "2017",
+      "measurement_range": "Видимый свет",
+      "resolution": "Очень высокое (до 200 000)",
+      "calibration": "Лазерный частотный гребенка",
+      "stability": "Температурная стабилизация ±0.001 °С",
+      "instrument_type": "Эшелле-спектрограф третьего поколения",
+      "image": "espresso.jpg"
+    },
+    {
+      "id": 4,
+      "name": "SPIRou",
+      "full_name": "SPIRou (SpectroPolarimètre InfraRouge)",
+      "type": "ground",
+      "description": "Спектрополяриметр для поиска экзопланет вокруг красных карликов",
+      "accuracy": 1.0,
+      "accuracy_unit": "м/с",
+      "location": "CFHT, Мауна-Кеа, Гавайи",
+      "status": "Активен",
+      "launch_date": "2018",
+      "measurement_range": "Ближний инфракрасный",
+      "resolution": "Высокое (до 70 000)",
+      "calibration": "Торий-аргонная лампа",
+      "stability": "Криогенное охлаждение",
+      "instrument_type": "Инфракрасный спектрополяриметр",
+      "image": "spirou.jpg"
+    }
+  ],
+  "calculations": [
+    {
+      "id": 1,
+      "researcher_name": "Др. Анна Козлова",
+      "institution": "Институт астрономии РАН",
+      "created_at": "2024-01-15",
+      "status": "В обработке",
+      "items": [
+        {
+          "instrument_id": 1,
+          "exoplanet_name": "Proxima Centauri b",
+          "star_mass": 0.12,
+          "orbital_period": 11.18,
+          "velocity_amplitude": 1.4,
+          "inclination": 90.0,
+          "comment": "Подтверждено HARPS",
+          "other": "Жизнепригодная зона"
+        }
+      ],
+      "result": "Предварительный расчет массы завершен. Требуется дополнительная верификация."
+    },
+    {
+      "id": 2,
+      "researcher_name": "Проф. Михаил Петров",
+      "institution": "МГУ",
+      "created_at": "2024-02-20",
+      "status": "Завершено",
+      "items": [
+        {
+          "instrument_id": 2,
+          "exoplanet_name": "WASP-18 b",
+          "star_mass": 1.2,
+          "orbital_period": 0.94,
+          "velocity_amplitude": 300.0,
+          "inclination": 86.0,
+          "comment": "Наблюдения JWST",
+          "other": "Горячий Юпитер"
+        }
+      ],
+      "result": "Расчет массы экзопланет завершен и подтвержден. Результаты опубликованы."
+    }
+  ]
+}
