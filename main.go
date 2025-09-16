@@ -143,6 +143,9 @@ func getInstrumentByID(id int) *Instrument {
 func instrumentsHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("templates/instruments.html"))
 	
+	// Получение параметра поиска
+	searchQuery := r.URL.Query().Get("search")
+	
 	// Подсчет общего количества расчетов
 	totalCalculations := len(data.Calculations)
 	
@@ -154,9 +157,22 @@ func instrumentsHandler(w http.ResponseWriter, r *http.Request) {
 		selectedInstruments = data.Instruments
 	}
 	
-	// Генерация URL изображений для всех инструментов
-	instrumentsWithImages := make([]map[string]interface{}, len(data.Instruments))
-	for i, instrument := range data.Instruments {
+	// Фильтрация инструментов по поисковому запросу
+	var filteredInstruments []Instrument
+	if searchQuery != "" {
+		for _, instrument := range data.Instruments {
+			if strings.Contains(strings.ToLower(instrument.Name), strings.ToLower(searchQuery)) ||
+			   strings.Contains(strings.ToLower(instrument.FullName), strings.ToLower(searchQuery)) {
+				filteredInstruments = append(filteredInstruments, instrument)
+			}
+		}
+	} else {
+		filteredInstruments = data.Instruments
+	}
+	
+	// Генерация URL изображений для отфильтрованных инструментов
+	instrumentsWithImages := make([]map[string]interface{}, len(filteredInstruments))
+	for i, instrument := range filteredInstruments {
 		imageURL, err := getImageURL(instrument.Image)
 		if err != nil {
 			log.Printf("Ошибка получения URL изображения для %s: %v", instrument.Name, err)
@@ -173,6 +189,7 @@ func instrumentsHandler(w http.ResponseWriter, r *http.Request) {
 		"Instruments":        instrumentsWithImages,
 		"TotalCalculations":  totalCalculations,
 		"SelectedInstruments": selectedInstruments,
+		"SearchQuery":        searchQuery,
 	}
 	
 	err := tmpl.Execute(w, templateData)
@@ -186,6 +203,9 @@ func instrumentsHandler(w http.ResponseWriter, r *http.Request) {
 func calculationHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("templates/calculation.html"))
 	
+	// Получение параметра поиска
+	searchQuery := r.URL.Query().Get("search")
+	
 	// Получение выбранных инструментов для расчета (HARPS и James Webb)
 	var selectedInstruments []Instrument
 	for _, instrument := range data.Instruments {
@@ -194,9 +214,22 @@ func calculationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	
-	// Генерация URL изображений для выбранных инструментов
-	selectedInstrumentsWithImages := make([]map[string]interface{}, len(selectedInstruments))
-	for i, instrument := range selectedInstruments {
+	// Фильтрация выбранных инструментов по поисковому запросу
+	var filteredSelectedInstruments []Instrument
+	if searchQuery != "" {
+		for _, instrument := range selectedInstruments {
+			if strings.Contains(strings.ToLower(instrument.Name), strings.ToLower(searchQuery)) ||
+			   strings.Contains(strings.ToLower(instrument.FullName), strings.ToLower(searchQuery)) {
+				filteredSelectedInstruments = append(filteredSelectedInstruments, instrument)
+			}
+		}
+	} else {
+		filteredSelectedInstruments = selectedInstruments
+	}
+	
+	// Генерация URL изображений для отфильтрованных выбранных инструментов
+	selectedInstrumentsWithImages := make([]map[string]interface{}, len(filteredSelectedInstruments))
+	for i, instrument := range filteredSelectedInstruments {
 		imageURL, err := getImageURL(instrument.Image)
 		if err != nil {
 			log.Printf("Ошибка получения URL изображения для %s: %v", instrument.Name, err)
@@ -214,6 +247,7 @@ func calculationHandler(w http.ResponseWriter, r *http.Request) {
 	templateData := map[string]interface{}{
 		"SelectedInstruments": selectedInstrumentsWithImages,
 		"TotalCalculations":   totalCalculations,
+		"SearchQuery":         searchQuery,
 	}
 	
 	err := tmpl.Execute(w, templateData)

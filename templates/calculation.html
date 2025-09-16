@@ -41,7 +41,10 @@
         </div>
 
         <div class="search-only-section">
-            <input type="text" class="search-bar" placeholder="...">
+            <form method="GET" action="/calculation" style="display: flex; gap: 10px; width: 100%; max-width: 400px;">
+                <input type="text" name="search" class="search-bar" placeholder="Поиск по названию..." value="{{.SearchQuery}}">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
         </div>
 
         <div class="selected-section">
