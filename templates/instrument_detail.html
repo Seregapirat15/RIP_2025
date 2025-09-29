@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация об инструменте</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <button class="explore-btn" onclick="window.location.href='/'">Explore ▼</button>
+    </div>
+
+    <div class="main-content">
+        <div class="instrument-detail">
+        <div class="instrument-image">
+            {{if .ImageURL}}
+                <img src="{{.ImageURL}}" alt="{{.Instrument.Name}}" style="width: 100%; height: 100%; object-fit: cover;">
+            {{else}}
+                {{.Instrument.Name}}
+            {{end}}
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Название:</div>
+            <div class="detail-value">{{.Instrument.FullName}}</div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Описание:</div>
+            <div class="detail-value">{{.Instrument.Description}}</div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Характеристики:</h3>
+            
+            <div class="detail-row">
+                <div class="detail-label">Точность измерений:</div>
+                <div class="detail-value">{{.Instrument.Accuracy}} {{.Instrument.AccuracyUnit}}</div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Диапазон измерений:</div>
+                <div class="detail-value">{{.Instrument.MeasurementRange}}</div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Разрешение:</div>
+                <div class="detail-value">{{.Instrument.Resolution}}</div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Калибровка:</div>
+                <div class="detail-value">{{.Instrument.Calibration}}</div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Стабильность:</div>
+                <div class="detail-value">{{.Instrument.Stability}}</div>
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Тип прибора:</div>
+                <div class="detail-value">{{.Instrument.InstrumentType}}</div>
+            </div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Местоположение:</div>
+            <div class="detail-value">{{.Instrument.Location}}</div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Статус:</div>
+            <div class="detail-value">{{.Instrument.Status}}</div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Дата запуска:</div>
+            <div class="detail-value">{{.Instrument.LaunchDate}}</div>
+        </div>
+        </div>
+    </div>
+</body>
+</html>

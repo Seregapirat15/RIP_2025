@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчёт массы экзопланеты</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <button class="explore-btn" onclick="window.location.href='/'">Explore ▼</button>
+    </div>
+
+    <div class="main-content">
+        <div class="page-title">Расчёт массы экзопланеты</div>
+
+        <div class="form-section">
+            <div class="form-row">
+                <div class="form-label">Название экзопланеты</div>
+                <input type="text" class="form-input" placeholder="Введите название">
+            </div>
+            <div class="form-row">
+                <div class="form-label">Масса звезды</div>
+                <input type="text" class="form-input" placeholder="Введите массу">
+            </div>
+            <div class="form-row">
+                <div class="form-label">Наклонение орбиты</div>
+                <input type="text" class="form-input" value="90">
+                <div class="checkbox-container">
+                    <input type="checkbox" class="checkbox" checked>
+                    <span>Транзитная</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-label">Примечание</div>
+                <input type="text" class="form-input" placeholder="Введите примечание">
+                <button class="calculate-btn">
+                    Рассчитать <span class="arrow"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="search-only-section">
+            <form method="GET" action="/calculation" style="display: flex; gap: 10px; width: 100%; max-width: 400px;">
+                <input type="text" name="search" class="search-bar" placeholder="Поиск по названию..." value="{{.SearchQuery}}">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </div>
+
+        <div class="selected-section">
+            <div class="selected-title">Выбраны для расчёта</div>
+            
+            {{range .SelectedInstruments}}
+            <div class="selected-item">
+                <input type="checkbox" class="item-checkbox" {{if eq .Instrument.Name "HARPS"}}checked{{end}}>
+                <div class="item-image">
+                    {{if .ImageURL}}
+                        <img src="{{.ImageURL}}" alt="{{.Instrument.Name}}">
+                    {{else}}
+                        {{.Instrument.Name}}
+                    {{end}}
+                </div>
+                <div class="item-name">{{.Instrument.Name}}</div>
+                <button class="delete-btn">🗑️</button>
+            </div>
+            {{end}}
+            </div>
+    </div>
+</body>
+</html>
