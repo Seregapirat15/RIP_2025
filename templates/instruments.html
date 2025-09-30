@@ -17,9 +17,15 @@
                 <input type="text" name="search" class="search-bar" placeholder="Поиск по названию..." value="{{.SearchQuery}}">
                 <button type="submit" class="search-btn">🔍</button>
             </form>
-            <button class="calculation-btn" onclick="window.location.href='/calculation'">
-                Расчёт <span class="calculation-count">{{if .TotalCalculations}}{{.TotalCalculations}}{{else}}0{{end}}</span>
+            {{if .CurrentCalculation}}
+            <button class="calculation-btn" onclick="window.location.href='/calculation/{{.CurrentCalculation.ID}}'">
+                Расчёт <span class="calculation-count">{{.TotalCalculations}}</span>
             </button>
+            {{else}}
+            <button class="calculation-btn" disabled style="opacity: 0.5;">
+                Расчёт <span class="calculation-count">0</span>
+            </button>
+            {{end}}
         </div>
         
         <div class="instruments-grid">
@@ -35,9 +41,19 @@
             <div class="instrument-content">
                 <div class="instrument-title">{{.Instrument.Name}}</div>
                 <div class="instrument-actions">
-                    <button class="action-btn" onclick="window.location.href='/instrument/{{.Instrument.ID}}'">
-                        Add <span class="arrow"></span>
-                    </button>
+                    <form method="POST" action="/add-to-calculation" style="display: inline;">
+                        <input type="hidden" name="instrument_id" value="{{.Instrument.ID}}">
+                        <input type="hidden" name="exoplanet_name" value="Новая экзопланета">
+                        <input type="hidden" name="star_mass" value="1.0">
+                        <input type="hidden" name="orbital_period" value="365.0">
+                        <input type="hidden" name="velocity_amplitude" value="10.0">
+                        <input type="hidden" name="inclination" value="90.0">
+                        <input type="hidden" name="comment" value="Добавлено с главной страницы">
+                        <input type="hidden" name="other_info" value="">
+                        <button type="submit" class="action-btn">
+                            Add <span class="arrow"></span>
+                        </button>
+                    </form>
                     <button class="action-btn" onclick="window.location.href='/instrument/{{.Instrument.ID}}'">
                         About <span class="arrow"></span>
                     </button>

@@ -13,46 +13,43 @@
 
     <div class="main-content">
         <div class="page-title">Расчёт массы экзопланеты</div>
-
-        <div class="form-section">
-            <div class="form-row">
-                <div class="form-label">Название экзопланеты</div>
-                <input type="text" class="form-input" placeholder="Введите название">
+        
+        <!-- Информация о заявке -->
+        <div class="calculation-info">
+            <div class="detail-row">
+                <div class="detail-label">ID заявки:</div>
+                <div class="detail-value">{{.Calculation.ID}}</div>
             </div>
-            <div class="form-row">
-                <div class="form-label">Масса звезды</div>
-                <input type="text" class="form-input" placeholder="Введите массу">
+            <div class="detail-row">
+                <div class="detail-label">Статус:</div>
+                <div class="detail-value">{{.Calculation.Status}}</div>
             </div>
-            <div class="form-row">
-                <div class="form-label">Наклонение орбиты</div>
-                <input type="text" class="form-input" value="90">
-                <div class="checkbox-container">
-                    <input type="checkbox" class="checkbox" checked>
-                    <span>Транзитная</span>
-                </div>
+            <div class="detail-row">
+                <div class="detail-label">Исследователь:</div>
+                <div class="detail-value">{{.Calculation.ResearcherName}}</div>
             </div>
-            <div class="form-row">
-                <div class="form-label">Примечание</div>
-                <input type="text" class="form-input" placeholder="Введите примечание">
-                <button class="calculate-btn">
-                    Рассчитать <span class="arrow"></span>
-                </button>
+            <div class="detail-row">
+                <div class="detail-label">Институт:</div>
+                <div class="detail-value">{{.Calculation.Institution}}</div>
             </div>
+            <div class="detail-row">
+                <div class="detail-label">Дата создания:</div>
+                <div class="detail-value">{{.Calculation.CreatedAt.Format "2006-01-02 15:04"}}</div>
+            </div>
+            {{if .Calculation.Result}}
+            <div class="detail-row">
+                <div class="detail-label">Результат:</div>
+                <div class="detail-value">{{.Calculation.Result}}</div>
+            </div>
+            {{end}}
         </div>
 
-        <div class="search-only-section">
-            <form method="GET" action="/calculation" style="display: flex; gap: 10px; width: 100%; max-width: 400px;">
-                <input type="text" name="search" class="search-bar" placeholder="Поиск по названию..." value="{{.SearchQuery}}">
-                <button type="submit" class="search-btn">🔍</button>
-            </form>
-        </div>
-
+        <!-- Инструменты в заявке -->
         <div class="selected-section">
-            <div class="selected-title">Выбраны для расчёта</div>
+            <div class="selected-title">Инструменты в расчёте</div>
             
-            {{range .SelectedInstruments}}
+            {{range .Instruments}}
             <div class="selected-item">
-                <input type="checkbox" class="item-checkbox" {{if eq .Instrument.Name "HARPS"}}checked{{end}}>
                 <div class="item-image">
                     {{if .ImageURL}}
                         <img src="{{.ImageURL}}" alt="{{.Instrument.Name}}">
@@ -60,11 +57,68 @@
                         {{.Instrument.Name}}
                     {{end}}
                 </div>
-                <div class="item-name">{{.Instrument.Name}}</div>
-                <button class="delete-btn">🗑️</button>
+                <div class="item-details">
+                    <div class="item-name">{{.Instrument.Name}}</div>
+                    <div class="calculation-data">
+                        <div class="data-row">
+                            <span class="data-label">Экзопланета:</span>
+                            <span class="data-value">{{.CalculationData.ExoplanetName}}</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Масса звезды:</span>
+                            <span class="data-value">{{printf "%.3f" .CalculationData.StarMass}} M☉</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Орбитальный период:</span>
+                            <span class="data-value">{{printf "%.2f" .CalculationData.OrbitalPeriod}} дней</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Амплитуда скорости:</span>
+                            <span class="data-value">{{printf "%.1f" .CalculationData.VelocityAmplitude}} м/с</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Наклон орбиты:</span>
+                            <span class="data-value">{{printf "%.1f" .CalculationData.Inclination}}°</span>
+                        </div>
+                        {{if .CalculationData.Comment}}
+                        <div class="data-row">
+                            <span class="data-label">Комментарий:</span>
+                            <span class="data-value">{{.CalculationData.Comment}}</span>
+                        </div>
+                        {{end}}
+                        {{if .CalculationData.OtherInfo}}
+                        <div class="data-row">
+                            <span class="data-label">Доп. информация:</span>
+                            <span class="data-value">{{.CalculationData.OtherInfo}}</span>
+                        </div>
+                        {{end}}
+                        {{if .CalculationData.CalculatedMass}}
+                        <div class="data-row">
+                            <span class="data-label">Рассчитанная масса экзопланеты:</span>
+                            <span class="data-value">{{printf "%.6f" .CalculationData.CalculatedMass}} M☉</span>
+                        </div>
+                        {{else}}
+                        <div class="data-row">
+                            <span class="data-label">Рассчитанная масса экзопланеты:</span>
+                            <span class="data-value">Не рассчитано</span>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
             </div>
             {{end}}
-            </div>
+        </div>
+        
+        <!-- Кнопка удаления заявки -->
+        {{if eq .Calculation.Status "черновик"}}
+        <div class="delete-section">
+            <form method="POST" action="/delete-calculation/{{.Calculation.ID}}" style="display: inline;">
+                <button type="submit" class="delete-btn" onclick="return confirm('Вы уверены, что хотите удалить эту заявку?')">
+                    Удалить заявку
+                </button>
+            </form>
+        </div>
+        {{end}}
     </div>
 </body>
 </html>
