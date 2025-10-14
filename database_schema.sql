@@ -11,6 +11,11 @@ CREATE TABLE instruments (
     description TEXT,
     accuracy DECIMAL(10,3),
     accuracy_unit VARCHAR(50),
+    velocity_precision DECIMAL(8,3), -- Точность измерения скорости (м/с)
+    wavelength_range_min DECIMAL(8,2), -- Минимальная длина волны (нм)
+    wavelength_range_max DECIMAL(8,2), -- Максимальная длина волна (нм)
+    resolution_power INTEGER, -- Разрешающая способность
+    spectral_resolution DECIMAL(10,0), -- Спектральное разрешение
     location VARCHAR(200),
     status VARCHAR(50) DEFAULT 'Активен',
     launch_date VARCHAR(10),
@@ -74,11 +79,11 @@ CREATE INDEX idx_calculation_instruments_instr ON calculation_instruments(instru
 -- Вставка тестовых данных
 
 -- Инструменты
-INSERT INTO instruments (name, full_name, type, description, accuracy, accuracy_unit, location, status, launch_date, measurement_range, resolution, calibration, stability, instrument_type, image_url) VALUES
-('HARPS', 'HARPS(High Accuracy Radial velocity Planet Searcher)', 'ground', 'Один из самых продуктивных спектографов. Обнаружил множество экзопланет, включая планеты земного типа', 0.97, 'м/с (3.5 км/ч)', '3.6-м телескоп, Обсерватория Ла-Силья (ESO, Чили)', 'Активен', '2003', 'Видимый свет', 'Высокое (до 115 000)', 'Торий-аргонная лампа', 'Вакуумная камера с температурным контролем ±0.01 °С', 'Эшелле-спектрограф второго поколения', 'harps.jpg'),
-('James Webb', 'James Webb Space Telescope (JWST)', 'space', 'Космический телескоп нового поколения для изучения экзопланет и их атмосфер', 0.1, 'м/с', 'Точка Лагранжа L2', 'Активен', '2021', 'Инфракрасный спектр', 'Очень высокое (до 2700)', 'Встроенные эталоны', 'Криогенное охлаждение до 7K', 'Космический инфракрасный телескоп', 'james_webb.jpg'),
-('ESPRESSO', 'ESPRESSO (Echelle SPectrograph for Rocky Exoplanet and Stable Spectroscopic Observations)', 'ground', 'Сверхстабильный спектрограф для поиска землеподобных экзопланет', 0.1, 'м/с', 'VLT, Параналь, Чили', 'Активен', '2017', 'Видимый свет', 'Очень высокое (до 200 000)', 'Лазерный частотный гребенка', 'Температурная стабилизация ±0.001 °С', 'Эшелле-спектрограф третьего поколения', 'espresso.jpg'),
-('SPIRou', 'SPIRou (SpectroPolarimètre InfraRouge)', 'ground', 'Спектрополяриметр для поиска экзопланет вокруг красных карликов', 1.0, 'м/с', 'CFHT, Мауна-Кеа, Гавайи', 'Активен', '2018', 'Ближний инфракрасный', 'Высокое (до 70 000)', 'Торий-аргонная лампа', 'Криогенное охлаждение', 'Инфракрасный спектрополяриметр', 'spirou.jpg');
+INSERT INTO instruments (name, full_name, type, description, accuracy, accuracy_unit, velocity_precision, wavelength_range_min, wavelength_range_max, resolution_power, spectral_resolution, location, status, launch_date, measurement_range, resolution, calibration, stability, instrument_type, image_url) VALUES
+('HARPS', 'HARPS(High Accuracy Radial velocity Planet Searcher)', 'ground', 'Один из самых продуктивных спектографов. Обнаружил множество экзопланет, включая планеты земного типа', 0.97, 'м/с (3.5 км/ч)', 1.0, 380.0, 690.0, 115000, 115000, '3.6-м телескоп, Обсерватория Ла-Силья (ESO, Чили)', 'Активен', '2003', 'Видимый свет', 'Высокое (до 115 000)', 'Торий-аргонная лампа', 'Вакуумная камера с температурным контролем ±0.01 °С', 'Эшелле-спектрограф второго поколения', 'harps.jpg'),
+('James Webb', 'James Webb Space Telescope (JWST)', 'space', 'Космический телескоп нового поколения для изучения экзопланет и их атмосфер', 0.1, 'м/с', 0.1, 600.0, 28000.0, 2700, 2700, 'Точка Лагранжа L2', 'Активен', '2021', 'Инфракрасный спектр', 'Очень высокое (до 2700)', 'Встроенные эталоны', 'Криогенное охлаждение до 7K', 'Космический инфракрасный телескоп', 'james_webb.jpg'),
+('ESPRESSO', 'ESPRESSO (Echelle SPectrograph for Rocky Exoplanet and Stable Spectroscopic Observations)', 'ground', 'Сверхстабильный спектрограф для поиска землеподобных экзопланет', 0.1, 'м/с', 0.1, 380.0, 788.0, 200000, 200000, 'VLT, Параналь, Чили', 'Активен', '2017', 'Видимый свет', 'Очень высокое (до 200 000)', 'Лазерный частотный гребенка', 'Температурная стабилизация ±0.001 °С', 'Эшелле-спектрограф третьего поколения', 'espresso.jpg'),
+('SPIRou', 'SPIRou (SpectroPolarimètre InfraRouge)', 'ground', 'Спектрополяриметр для поиска экзопланет вокруг красных карликов', 1.0, 'м/с', 2.0, 980.0, 2350.0, 70000, 70000, 'CFHT, Мауна-Кеа, Гавайи', 'Активен', '2018', 'Ближний инфракрасный', 'Высокое (до 70 000)', 'Торий-аргонная лампа', 'Криогенное охлаждение', 'Инфракрасный спектрополяриметр', 'spirou.jpg');
 
 -- Расчеты
 INSERT INTO calculations (status, creator_id, researcher_name, institution, result) VALUES

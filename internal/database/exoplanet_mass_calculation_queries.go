@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 	"lab2/internal/models"
 )
 
@@ -133,4 +134,41 @@ func DeleteExoplanetMassCalculationSQL(calculationID int) error {
 	query := `UPDATE calculations SET status = 'удалён' WHERE id = $1`
 	_, err := PostgreSQLConnection.Exec(query, calculationID)
 	return err
+}
+
+// DeleteExoplanetMassCalculationWithCursor удаляет заявку через курсор
+func DeleteExoplanetMassCalculationWithCursor(calculationID int) error {
+	// Начинаем транзакцию
+	tx, err := PostgreSQLConnection.Begin()
+	if err != nil {
+		return fmt.Errorf("ошибка начала транзакции: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Создаем курсор для обновления заявки
+	cursorQuery := `UPDATE calculations SET status = 'удалён' WHERE id = $1`
+	
+	// Выполняем UPDATE через курсор
+	result, err := tx.Exec(cursorQuery, calculationID)
+	if err != nil {
+		return fmt.Errorf("ошибка выполнения UPDATE через курсор: %w", err)
+	}
+
+	// Проверяем, что строка была обновлена
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("ошибка получения количества обновленных строк: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("заявка с ID %d не найдена", calculationID)
+	}
+
+	// Подтверждаем транзакцию
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("ошибка подтверждения транзакции: %w", err)
+	}
+
+	return nil
 }
