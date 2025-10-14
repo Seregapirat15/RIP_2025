@@ -70,3 +70,4 @@ func ApplyAstronomicalTelescopeInstrumentCorrection(calculatedMass, accuracy flo
 	return calculatedMass * correctionFactor
 }
 
+

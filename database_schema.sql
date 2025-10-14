@@ -2,6 +2,20 @@
 -- Лабораторная работа 2
 -- База данных уже создана через переменную окружения POSTGRES_DB
 
+-- 0. Таблица пользователей
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    login VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    role VARCHAR(20) DEFAULT 'user', -- 'user', 'moderator', 'admin'
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 1. Таблица астрономических инструментов (телескопы)
 CREATE TABLE instruments (
     id SERIAL PRIMARY KEY,
@@ -34,12 +48,12 @@ CREATE TABLE calculations (
     id SERIAL PRIMARY KEY,
     status VARCHAR(50) NOT NULL, -- черновик, удалён, сформирован, завершён, отклонён
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- дата создания
-    creator_id INTEGER NOT NULL DEFAULT 1, -- создатель (пока хардкод)
+    creator_id INTEGER NOT NULL DEFAULT 1 REFERENCES users(id), -- создатель
     
     -- Дополнительные поля (Nullable)
     formation_date TIMESTAMP, -- дата формирования (2 действия создателя)
     completion_date TIMESTAMP, -- дата завершения (2 действия модератора)
-    moderator_id INTEGER DEFAULT 1, -- модератор (пока хардкод)
+    moderator_id INTEGER DEFAULT 1 REFERENCES users(id), -- модератор
     
     -- Поля по предметной области
     researcher_name VARCHAR(100),
@@ -77,6 +91,13 @@ CREATE INDEX idx_calculation_instruments_calc ON calculation_instruments(calcula
 CREATE INDEX idx_calculation_instruments_instr ON calculation_instruments(instrument_id);
 
 -- Вставка тестовых данных
+
+-- Тестовые пользователи (должны быть созданы первыми)
+INSERT INTO users (login, email, password_hash, first_name, last_name, role) VALUES
+('admin', 'admin@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjdQjO3Z8VqJ8K8K8K8K8K8K8K8K8K8', 'Админ', 'Админов', 'admin'),
+('moderator', 'moderator@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjdQjO3Z8VqJ8K8K8K8K8K8K8K8K8K8', 'Модератор', 'Модераторов', 'moderator'),
+('user1', 'user1@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjdQjO3Z8VqJ8K8K8K8K8K8K8K8K8K8', 'Пользователь', 'Первый', 'user'),
+('user2', 'user2@example.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjdQjO3Z8VqJ8K8K8K8K8K8K8K8K8K8', 'Пользователь', 'Второй', 'user');
 
 -- Инструменты
 INSERT INTO instruments (name, full_name, type, description, accuracy, accuracy_unit, velocity_precision, wavelength_range_min, wavelength_range_max, resolution_power, spectral_resolution, location, status, launch_date, measurement_range, resolution, calibration, stability, instrument_type, image_url) VALUES

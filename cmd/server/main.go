@@ -38,11 +38,15 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	// Маршруты
+	// Веб-интерфейс (старые маршруты)
 	r.HandleFunc("/", handlers.AstronomicalTelescopeInstrumentsHandler).Methods("GET")
 	r.HandleFunc("/tool/{id}", handlers.AstronomicalTelescopeInstrumentDetailHandler).Methods("GET")
 	r.HandleFunc("/calculation/{id}", handlers.ExoplanetMassCalculationHandler).Methods("GET")
 	r.HandleFunc("/add-to-calculation", handlers.AddAstronomicalTelescopeInstrumentToExoplanetMassCalculationHandler).Methods("POST")
 	r.HandleFunc("/delete-calculation/{id}", handlers.DeleteExoplanetMassCalculationHandler).Methods("POST")
+	
+	// API маршруты
+	handlers.SetupAPIRoutes(r)
 
 	fmt.Println("Сервер системы расчета массы экзопланет запущен на http://localhost:8081")
 	fmt.Println("PostgreSQL подключен к:", cfg.DBHost+":"+fmt.Sprintf("%d", cfg.DBPort))

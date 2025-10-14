@@ -41,19 +41,9 @@
             <div class="instrument-content">
                 <div class="instrument-title">{{.Instrument.Name}}</div>
                 <div class="instrument-actions">
-                    <form method="POST" action="/add-to-calculation" style="display: inline;">
-                        <input type="hidden" name="tool_id" value="{{.Instrument.ID}}">
-                        <input type="hidden" name="exoplanet_name" value="Новая экзопланета">
-                        <input type="hidden" name="star_mass" value="1.0">
-                        <input type="hidden" name="orbital_period" value="365.0">
-                        <input type="hidden" name="velocity_amplitude" value="10.0">
-                        <input type="hidden" name="inclination" value="90.0">
-                        <input type="hidden" name="comment" value="Добавлено с главной страницы">
-                        <input type="hidden" name="other_info" value="">
-                        <button type="submit" class="action-btn">
-                            Add <span class="arrow"></span>
-                        </button>
-                    </form>
+                    <button type="button" class="action-btn" onclick="addInstrumentToOrder({{.Instrument.ID}})">
+                        Add <span class="arrow"></span>
+                    </button>
                     <button class="action-btn" onclick="window.location.href='/tool/{{.Instrument.ID}}'">
                         About <span class="arrow"></span>
                     </button>
@@ -63,5 +53,130 @@
         {{end}}
         </div>
     </div>
+
+    <!-- API Integration Scripts -->
+    <script>
+        // API Base URL
+        const API_BASE = '/api';
+        
+        // Auth token management
+        function getAuthToken() {
+            return localStorage.getItem('auth_token');
+        }
+        
+        function setAuthToken(token) {
+            localStorage.setItem('auth_token', token);
+        }
+        
+        function removeAuthToken() {
+            localStorage.removeItem('auth_token');
+        }
+        
+        // API Helper functions
+        async function apiRequest(url, options = {}) {
+            const token = getAuthToken();
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            };
+            
+            const response = await fetch(API_BASE + url, { ...defaultOptions, ...options });
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            
+            return response.json();
+        }
+        
+        // Orders API - only cart functionality needed
+        async function getCartIcon() {
+            return await apiRequest('/orders/cart');
+        }
+        
+        async function addServiceToOrder(serviceId) {
+            return await apiRequest('/orders/services', {
+                method: 'POST',
+                body: JSON.stringify({
+                    service_id: serviceId,
+                    exoplanet_name: "Новая экзопланета",
+                    star_mass: 1.0,
+                    orbital_period: 365.0,
+                    velocity_amplitude: 10.0,
+                    inclination: 90.0,
+                    eccentricity: 0.0,
+                    comment: "Добавлено с главной страницы",
+                    other_info: ""
+                })
+            });
+        }
+        
+        async function addInstrumentToOrder(instrumentId) {
+            try {
+                console.log('Adding instrument to order:', instrumentId);
+                
+                // Add service to order
+                const result = await addServiceToOrder(instrumentId);
+                console.log('Add service result:', result);
+                
+                // Update cart display
+                await updateCartDisplay();
+                
+                // Show success message
+                showMessage('Инструмент добавлен в заявку!', 'success');
+                
+            } catch (error) {
+                console.error('Error adding instrument to order:', error);
+                showMessage('Ошибка при добавлении инструмента: ' + error.message, 'error');
+            }
+        }
+        
+        async function updateCartDisplay() {
+            try {
+                console.log('Updating cart display...');
+                const cart = await getCartIcon();
+                console.log('Cart data:', cart);
+                
+                const cartCount = document.querySelector('.calculation-count');
+                console.log('Found cart count element:', cartCount);
+                
+                if (cartCount) {
+                    const newCount = cart.services_count || 0;
+                    console.log('Updating cart count from', cartCount.textContent, 'to', newCount);
+                    cartCount.textContent = newCount;
+                } else {
+                    console.log('Cart count element not found');
+                }
+            } catch (error) {
+                console.error('Error updating cart display:', error);
+            }
+        }
+        
+        function showMessage(text, type) {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                border-radius: 5px;
+                color: white;
+                z-index: 1000;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            `;
+            document.body.appendChild(message);
+            
+            setTimeout(() => message.remove(), 3000);
+        }
+        
+        // Initialize API functionality on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update cart display on load
+            updateCartDisplay();
+        });
+    </script>
 </body>
 </html>

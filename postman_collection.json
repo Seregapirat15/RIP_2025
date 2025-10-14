@@ -1,0 +1,363 @@
+{
+	"info": {
+		"name": "Exoplanet Mass Calculation API",
+		"description": "API для системы расчета массы экзопланет - Лабораторная 3",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Услуги (Services)",
+			"item": [
+				{
+					"name": "1. GET список услуг с фильтрацией",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/services?type=ground&status=Активен&search=HARPS",
+							"host": ["{{base_url}}"],
+							"path": ["api", "services"],
+							"query": [
+								{"key": "type", "value": "ground"},
+								{"key": "status", "value": "Активен"},
+								{"key": "search", "value": "HARPS"}
+							]
+						}
+					}
+				},
+				{
+					"name": "2. GET одна услуга",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/services/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "services", "1"]
+						}
+					}
+				},
+				{
+					"name": "3. POST добавление услуги",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Telescope\",\n  \"full_name\": \"New Advanced Telescope\",\n  \"type\": \"ground\",\n  \"description\": \"New telescope for exoplanet research\",\n  \"accuracy\": 0.95,\n  \"accuracy_unit\": \"м/с\",\n  \"velocity_precision\": 1.5,\n  \"wavelength_range_min\": 400.0,\n  \"wavelength_range_max\": 800.0,\n  \"resolution_power\": 100000,\n  \"spectral_resolution\": 100000,\n  \"location\": \"Test Observatory\",\n  \"launch_date\": \"2024\",\n  \"measurement_range\": \"Visible\",\n  \"resolution\": \"High\",\n  \"calibration\": \"Standard\",\n  \"stability\": \"Good\",\n  \"instrument_type\": \"Spectrograph\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/services",
+							"host": ["{{base_url}}"],
+							"path": ["api", "services"]
+						}
+					}
+				},
+				{
+					"name": "4. PUT изменение услуги",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Telescope\",\n  \"full_name\": \"Updated Advanced Telescope\",\n  \"type\": \"ground\",\n  \"description\": \"Updated telescope description\",\n  \"accuracy\": 0.98,\n  \"accuracy_unit\": \"м/с\",\n  \"velocity_precision\": 1.0,\n  \"wavelength_range_min\": 380.0,\n  \"wavelength_range_max\": 700.0,\n  \"resolution_power\": 120000,\n  \"spectral_resolution\": 120000,\n  \"location\": \"Updated Observatory\",\n  \"launch_date\": \"2024\",\n  \"measurement_range\": \"Visible\",\n  \"resolution\": \"Very High\",\n  \"calibration\": \"Advanced\",\n  \"stability\": \"Excellent\",\n  \"instrument_type\": \"Advanced Spectrograph\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/services/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "services", "1"]
+						}
+					}
+				},
+				{
+					"name": "5. DELETE удаление услуги",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/services/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "services", "1"]
+						}
+					}
+				},
+				{
+					"name": "6. POST добавление изображения",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "path/to/image.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/services/1/image",
+							"host": ["{{base_url}}"],
+							"path": ["api", "services", "1", "image"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Заявки (Orders)",
+			"item": [
+				{
+					"name": "7. GET иконка корзины",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/cart",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "cart"]
+						}
+					}
+				},
+				{
+					"name": "8. GET список заявок с фильтрацией",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders?status=сформирован&formation_from=2024-01-01&formation_to=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders"],
+							"query": [
+								{"key": "status", "value": "сформирован"},
+								{"key": "formation_from", "value": "2024-01-01"},
+								{"key": "formation_to", "value": "2024-12-31"}
+							]
+						}
+					}
+				},
+				{
+					"name": "9. GET одна заявка с услугами",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "10. PUT изменение заявки",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"result\": \"Предварительный расчет завершен\",\n  \"total_mass\": 1.5,\n  \"notes\": \"Дополнительные заметки по расчету\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1"]
+						}
+					}
+				},
+				{
+					"name": "11. PUT сформировать заявку",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/form",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1", "form"]
+						}
+					}
+				},
+				{
+					"name": "12. PUT завершить заявку",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"complete\",\n  \"result\": \"Расчет массы экзопланеты завершен успешно\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1", "complete"]
+						}
+					}
+				},
+				{
+					"name": "13. DELETE удаление заявки",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Связи Заявка-Услуга",
+			"item": [
+				{
+					"name": "14. POST добавление услуги в заявку",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"service_id\": 1,\n  \"exoplanet_name\": \"Proxima Centauri b\",\n  \"star_mass\": 0.12,\n  \"orbital_period\": 11.18,\n  \"velocity_amplitude\": 1.4,\n  \"inclination\": 90.0,\n  \"eccentricity\": 0.0,\n  \"comment\": \"Наблюдения HARPS\",\n  \"other_info\": \"Потенциально обитаемая зона\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/services",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "services"]
+						}
+					}
+				},
+				{
+					"name": "15. DELETE удаление услуги из заявки",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/services/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1", "services", "1"]
+						}
+					}
+				},
+				{
+					"name": "16. PUT изменение связи м-м",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"exoplanet_name\": \"Updated Proxima Centauri b\",\n  \"star_mass\": 0.15,\n  \"orbital_period\": 12.0,\n  \"velocity_amplitude\": 1.6,\n  \"inclination\": 89.0,\n  \"eccentricity\": 0.1,\n  \"comment\": \"Обновленные наблюдения HARPS\",\n  \"other_info\": \"Обновленная информация\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/services/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "orders", "1", "services", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Пользователи (Users)",
+			"item": [
+				{
+					"name": "17. POST регистрация пользователя",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"first_name\": \"New\",\n  \"last_name\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "register"]
+						}
+					}
+				},
+				{
+					"name": "18. GET данные пользователя",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "me"]
+						}
+					}
+				},
+				{
+					"name": "19. PUT обновление пользователя",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"updateduser\",\n  \"email\": \"updated@example.com\",\n  \"first_name\": \"Updated\",\n  \"last_name\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "me"]
+						}
+					}
+				},
+				{
+					"name": "20. POST аутентификация",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "login"]
+						}
+					}
+				},
+				{
+					"name": "21. POST деавторизация",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "logout"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		}
+	]
+}
+

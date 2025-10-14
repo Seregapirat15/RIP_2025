@@ -13,3 +13,4 @@ type AstronomicalResearcher struct {
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
+
