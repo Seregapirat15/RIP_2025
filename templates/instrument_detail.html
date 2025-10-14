@@ -80,34 +80,6 @@
             <div class="detail-value">{{.Instrument.LaunchDate}}</div>
         </div>
         
-        <!-- Форма для добавления в заявку -->
-        <div class="detail-section">
-            <h3>Добавить в расчет:</h3>
-            <form method="POST" action="/add-to-calculation" style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="hidden" name="instrument_id" value="{{.Instrument.ID}}">
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" name="exoplanet_name" placeholder="Название экзопланеты" required style="flex: 1;">
-                    <input type="number" name="star_mass" placeholder="Масса звезды (M☉)" step="0.001" required style="flex: 1;">
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" name="orbital_period" placeholder="Орбитальный период (дни)" step="0.01" required style="flex: 1;">
-                    <input type="number" name="velocity_amplitude" placeholder="Амплитуда скорости (м/с)" step="0.1" required style="flex: 1;">
-                </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" name="inclination" placeholder="Наклон орбиты (градусы)" step="0.1" required style="flex: 1;">
-                    <input type="text" name="comment" placeholder="Комментарий" style="flex: 1;">
-                </div>
-                
-                <input type="text" name="other_info" placeholder="Дополнительная информация">
-                
-                <button type="submit" class="action-btn" style="align-self: flex-start;">
-                    Добавить в расчет <span class="arrow"></span>
-                </button>
-            </form>
-        </div>
         </div>
     </div>
 </body>

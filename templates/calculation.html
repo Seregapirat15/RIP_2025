@@ -14,35 +14,6 @@
     <div class="main-content">
         <div class="page-title">Расчёт массы экзопланеты</div>
         
-        <!-- Информация о заявке -->
-        <div class="calculation-info">
-            <div class="detail-row">
-                <div class="detail-label">ID заявки:</div>
-                <div class="detail-value">{{.Calculation.ID}}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Статус:</div>
-                <div class="detail-value">{{.Calculation.Status}}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Исследователь:</div>
-                <div class="detail-value">{{.Calculation.ResearcherName}}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Институт:</div>
-                <div class="detail-value">{{.Calculation.Institution}}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Дата создания:</div>
-                <div class="detail-value">{{.Calculation.CreatedAt.Format "2006-01-02 15:04"}}</div>
-            </div>
-            {{if .Calculation.Result}}
-            <div class="detail-row">
-                <div class="detail-label">Результат:</div>
-                <div class="detail-value">{{.Calculation.Result}}</div>
-            </div>
-            {{end}}
-        </div>
 
         <!-- Инструменты в заявке -->
         <div class="selected-section">

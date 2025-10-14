@@ -2,19 +2,7 @@
 -- Лабораторная работа 2
 -- База данных уже создана через переменную окружения POSTGRES_DB
 
--- 1. Таблица пользователей (исследователей)
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    institution VARCHAR(100),
-    email VARCHAR(100),
-    is_moderator BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. Таблица инструментов (услуги)
+-- 1. Таблица астрономических инструментов (телескопы)
 CREATE TABLE instruments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -36,17 +24,17 @@ CREATE TABLE instruments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Таблица расчетов (заявки)
+-- 2. Таблица расчетов массы экзопланет (заявки)
 CREATE TABLE calculations (
     id SERIAL PRIMARY KEY,
     status VARCHAR(50) NOT NULL, -- черновик, удалён, сформирован, завершён, отклонён
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- дата создания
-    creator_id INTEGER NOT NULL REFERENCES users(id), -- создатель
+    creator_id INTEGER NOT NULL DEFAULT 1, -- создатель (пока хардкод)
     
     -- Дополнительные поля (Nullable)
     formation_date TIMESTAMP, -- дата формирования (2 действия создателя)
     completion_date TIMESTAMP, -- дата завершения (2 действия модератора)
-    moderator_id INTEGER REFERENCES users(id), -- модератор
+    moderator_id INTEGER DEFAULT 1, -- модератор (пока хардкод)
     
     -- Поля по предметной области
     researcher_name VARCHAR(100),
@@ -56,7 +44,7 @@ CREATE TABLE calculations (
     notes TEXT
 );
 
--- 4. Таблица связи расчетов с инструментами (м-м)
+-- 3. Таблица связи расчетов с инструментами (м-м)
 CREATE TABLE calculation_instruments (
     calculation_id INTEGER NOT NULL REFERENCES calculations(id),
     instrument_id INTEGER NOT NULL REFERENCES instruments(id),
@@ -85,12 +73,6 @@ CREATE INDEX idx_calculation_instruments_instr ON calculation_instruments(instru
 
 -- Вставка тестовых данных
 
--- Пользователи
-INSERT INTO users (username, password_hash, full_name, institution, email, is_moderator) VALUES
-('admin', '$2a$10$example_hash', 'Администратор системы', 'МГУ', 'admin@example.com', TRUE),
-('kozlov', '$2a$10$example_hash', 'Др. Анна Козлова', 'Институт астрономии РАН', 'kozlov@example.com', FALSE),
-('petrov', '$2a$10$example_hash', 'Проф. Михаил Петров', 'МГУ', 'petrov@example.com', FALSE);
-
 -- Инструменты
 INSERT INTO instruments (name, full_name, type, description, accuracy, accuracy_unit, location, status, launch_date, measurement_range, resolution, calibration, stability, instrument_type, image_url) VALUES
 ('HARPS', 'HARPS(High Accuracy Radial velocity Planet Searcher)', 'ground', 'Один из самых продуктивных спектографов. Обнаружил множество экзопланет, включая планеты земного типа', 0.97, 'м/с (3.5 км/ч)', '3.6-м телескоп, Обсерватория Ла-Силья (ESO, Чили)', 'Активен', '2003', 'Видимый свет', 'Высокое (до 115 000)', 'Торий-аргонная лампа', 'Вакуумная камера с температурным контролем ±0.01 °С', 'Эшелле-спектрограф второго поколения', 'harps.jpg'),
@@ -100,8 +82,8 @@ INSERT INTO instruments (name, full_name, type, description, accuracy, accuracy_
 
 -- Расчеты
 INSERT INTO calculations (status, creator_id, researcher_name, institution, result) VALUES
-('черновик', 2, 'Др. Анна Козлова', 'Институт астрономии РАН', 'Предварительный расчет массы завершен. Требуется дополнительная верификация.'),
-('завершён', 3, 'Проф. Михаил Петров', 'МГУ', 'Расчет массы экзопланет завершен и подтвержден. Результаты опубликованы.');
+('черновик', 1, 'Др. Анна Козлова', 'Институт астрономии РАН', 'Предварительный расчет массы завершен. Требуется дополнительная верификация.'),
+('завершён', 1, 'Проф. Михаил Петров', 'МГУ', 'Расчет массы экзопланет завершен и подтвержден. Результаты опубликованы.');
 
 -- Связи расчетов с инструментами
 INSERT INTO calculation_instruments (calculation_id, instrument_id, exoplanet_name, star_mass, orbital_period, velocity_amplitude, inclination, comment, other_info) VALUES

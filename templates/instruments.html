@@ -42,7 +42,7 @@
                 <div class="instrument-title">{{.Instrument.Name}}</div>
                 <div class="instrument-actions">
                     <form method="POST" action="/add-to-calculation" style="display: inline;">
-                        <input type="hidden" name="instrument_id" value="{{.Instrument.ID}}">
+                        <input type="hidden" name="tool_id" value="{{.Instrument.ID}}">
                         <input type="hidden" name="exoplanet_name" value="Новая экзопланета">
                         <input type="hidden" name="star_mass" value="1.0">
                         <input type="hidden" name="orbital_period" value="365.0">
@@ -54,7 +54,7 @@
                             Add <span class="arrow"></span>
                         </button>
                     </form>
-                    <button class="action-btn" onclick="window.location.href='/instrument/{{.Instrument.ID}}'">
+                    <button class="action-btn" onclick="window.location.href='/tool/{{.Instrument.ID}}'">
                         About <span class="arrow"></span>
                     </button>
                 </div>
