@@ -21,8 +21,9 @@ func GetCartIconHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Если заявки нет, возвращаем пустую корзину
 		json.NewEncoder(w).Encode(models.CartIcon{
-			OrderID:     0,
-			ServiceCount: 0,
+			OrderID:       0,
+			CalculationID: 0,
+			ServicesCount: 0,
 		})
 		return
 	}
@@ -35,8 +36,9 @@ func GetCartIconHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	json.NewEncoder(w).Encode(models.CartIcon{
-		OrderID:     order.ID,
-		ServiceCount: serviceCount,
+		OrderID:       order.ID,
+		CalculationID: order.ID, // В данном контексте calculation_id = order_id
+		ServicesCount: serviceCount,
 	})
 }
 

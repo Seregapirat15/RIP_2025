@@ -18,11 +18,11 @@
                 <button type="submit" class="search-btn">🔍</button>
             </form>
             {{if .CurrentCalculation}}
-            <button class="calculation-btn" onclick="window.location.href='/calculation/{{.CurrentCalculation.ID}}'">
+            <button class="calculation-btn" id="calculation-btn" onclick="window.location.href='/calculation/{{.CurrentCalculation.ID}}'">
                 Расчёт <span class="calculation-count">{{.TotalCalculations}}</span>
             </button>
             {{else}}
-            <button class="calculation-btn" disabled style="opacity: 0.5;">
+            <button class="calculation-btn" id="calculation-btn" disabled style="opacity: 0.5;">
                 Расчёт <span class="calculation-count">0</span>
             </button>
             {{end}}
@@ -85,7 +85,9 @@
             const response = await fetch(API_BASE + url, { ...defaultOptions, ...options });
             
             if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
+                const error = new Error(`API Error: ${response.status}`);
+                error.status = response.status;
+                throw error;
             }
             
             return response.json();
@@ -129,7 +131,21 @@
                 
             } catch (error) {
                 console.error('Error adding instrument to order:', error);
-                showMessage('Ошибка при добавлении инструмента: ' + error.message, 'error');
+                
+                // Handle different types of errors
+                let errorMessage = 'Ошибка при добавлении инструмента';
+                
+                if (error.status === 409) {
+                    errorMessage = 'Этот инструмент уже добавлен в заявку';
+                } else if (error.status === 400) {
+                    errorMessage = 'Некорректные данные для добавления';
+                } else if (error.status === 500) {
+                    errorMessage = 'Серверная ошибка. Попробуйте позже';
+                } else if (error.status >= 400) {
+                    errorMessage = 'Ошибка соединения с сервером';
+                }
+                
+                showMessage(errorMessage, 'error');
             }
         }
         
@@ -140,14 +156,59 @@
                 console.log('Cart data:', cart);
                 
                 const cartCount = document.querySelector('.calculation-count');
+                const calculationBtn = document.querySelector('#calculation-btn') || document.querySelector('.calculation-btn');
                 console.log('Found cart count element:', cartCount);
+                console.log('Found calculation button:', calculationBtn);
                 
-                if (cartCount) {
+                if (cartCount && calculationBtn) {
                     const newCount = cart.services_count || 0;
-                    console.log('Updating cart count from', cartCount.textContent, 'to', newCount);
+                    const oldCount = parseInt(cartCount.textContent) || 0;
+                    console.log('Updating cart count from', oldCount, 'to', newCount);
+                    
+                    // Add visual feedback for count change
+                    if (newCount > oldCount) {
+                        cartCount.style.transform = 'scale(1.2)';
+                        cartCount.style.color = '#28a745';
+                        setTimeout(() => {
+                            cartCount.style.transform = 'scale(1)';
+                            cartCount.style.color = '';
+                        }, 300);
+                    }
+                    
                     cartCount.textContent = newCount;
+                    
+                    // Update button state based on cart content
+                    if (newCount > 0) {
+                        // Enable button and make it clickable
+                        calculationBtn.disabled = false;
+                        calculationBtn.style.opacity = '1';
+                        calculationBtn.style.cursor = 'pointer';
+                        
+                        // Update onclick handler if cart has ID
+                        if (cart.calculation_id && cart.calculation_id > 0) {
+                            calculationBtn.onclick = () => {
+                                window.location.href = `/calculation/${cart.calculation_id}`;
+                            };
+                        } else if (cart.order_id && cart.order_id > 0) {
+                            // Fallback to order_id if calculation_id is not available
+                            calculationBtn.onclick = () => {
+                                window.location.href = `/calculation/${cart.order_id}`;
+                            };
+                        } else {
+                            // Fallback if no ID available
+                            calculationBtn.onclick = () => {
+                                window.location.href = '/calculation';
+                            };
+                        }
+                    } else {
+                        // Disable button when cart is empty
+                        calculationBtn.disabled = true;
+                        calculationBtn.style.opacity = '0.5';
+                        calculationBtn.style.cursor = 'not-allowed';
+                        calculationBtn.onclick = null;
+                    }
                 } else {
-                    console.log('Cart count element not found');
+                    console.log('Cart count element or calculation button not found');
                 }
             } catch (error) {
                 console.error('Error updating cart display:', error);
@@ -174,8 +235,18 @@
         
         // Initialize API functionality on page load
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing...');
+            
             // Update cart display on load
             updateCartDisplay();
+            
+            // Add click event listener for debugging
+            const calculationBtn = document.querySelector('#calculation-btn') || document.querySelector('.calculation-btn');
+            if (calculationBtn) {
+                console.log('Calculation button found:', calculationBtn);
+                console.log('Button disabled:', calculationBtn.disabled);
+                console.log('Button onclick:', calculationBtn.onclick);
+            }
         });
     </script>
 </body>

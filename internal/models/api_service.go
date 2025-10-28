@@ -78,8 +78,9 @@ type User struct {
 
 // CartIcon представляет иконку корзины
 type CartIcon struct {
-	OrderID     int `json:"order_id"`
-	ServiceCount int `json:"service_count"`
+	OrderID       int `json:"order_id"`
+	CalculationID int `json:"calculation_id"`
+	ServicesCount int `json:"services_count"`
 }
 
 // ServiceFilter представляет фильтр для услуг

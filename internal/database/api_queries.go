@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -485,12 +486,26 @@ func DeleteOrder(orderID int) error {
 
 // AddServiceToOrder добавляет услугу в заявку
 func AddServiceToOrder(orderService models.OrderService) error {
+	// Сначала проверяем, не добавлена ли уже эта услуга в заявку
+	var count int
+	checkQuery := `SELECT COUNT(*) FROM calculation_instruments 
+	               WHERE calculation_id = $1 AND instrument_id = $2`
+	err := PostgreSQLConnection.QueryRow(checkQuery, orderService.OrderID, orderService.ServiceID).Scan(&count)
+	if err != nil {
+		return err
+	}
+	
+	if count > 0 {
+		return errors.New("услуга уже добавлена в заявку")
+	}
+	
+	// Если услуга не добавлена, добавляем её
 	query := `INSERT INTO calculation_instruments 
 	          (calculation_id, instrument_id, exoplanet_name, star_mass, orbital_period, 
 	           velocity_amplitude, inclination, comment, other_info)
 	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	
-	_, err := PostgreSQLConnection.Exec(query,
+	_, err = PostgreSQLConnection.Exec(query,
 		orderService.OrderID, orderService.ServiceID, orderService.ExoplanetName,
 		orderService.StarMass, orderService.OrbitalPeriod, orderService.VelocityAmplitude,
 		orderService.Inclination, orderService.Comment, orderService.OtherInfo)

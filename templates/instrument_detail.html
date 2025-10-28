@@ -120,45 +120,7 @@
             return response.json();
         }
         
-        // Orders API - only needed functions
-        async function addServiceToOrder(serviceId) {
-            return await apiRequest('/orders/services', {
-                method: 'POST',
-                body: JSON.stringify({
-                    service_id: serviceId,
-                    exoplanet_name: "Новая экзопланета",
-                    star_mass: 1.0,
-                    orbital_period: 365.0,
-                    velocity_amplitude: 10.0,
-                    inclination: 90.0,
-                    eccentricity: 0.0,
-                    comment: "Добавлено со страницы инструмента",
-                    other_info: ""
-                })
-            });
-        }
-        
-        // Enhanced instrument detail management with API
-        async function addCurrentInstrumentToOrder() {
-            try {
-                // Get current instrument ID from URL or page data
-                const pathParts = window.location.pathname.split('/');
-                const instrumentId = pathParts[pathParts.length - 1];
-                
-                console.log('Adding instrument to order:', instrumentId);
-                
-                // Add service to order (assuming instrument ID is service ID)
-                const result = await addServiceToOrder(instrumentId);
-                console.log('Add service result:', result);
-                
-                // Show success message
-                showMessage('Инструмент добавлен в заявку!', 'success');
-                
-            } catch (error) {
-                console.error('Error adding instrument to order:', error);
-                showMessage('Ошибка при добавлении инструмента: ' + error.message, 'error');
-            }
-        }
+        // API functions removed - no order functionality on detail page
         
         
         function showMessage(text, type) {
@@ -181,35 +143,7 @@
         
         // Initialize API functionality on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Add only essential action button
-            const addToOrderBtn = document.createElement('button');
-            addToOrderBtn.textContent = 'Добавить в заявку';
-            addToOrderBtn.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: #28a745;
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 500;
-                box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-                transition: all 0.3s ease;
-                z-index: 1000;
-            `;
-            addToOrderBtn.onmouseover = () => {
-                addToOrderBtn.style.transform = 'translateY(-2px)';
-                addToOrderBtn.style.boxShadow = '0 4px 12px rgba(40, 167, 69, 0.4)';
-            };
-            addToOrderBtn.onmouseout = () => {
-                addToOrderBtn.style.transform = 'translateY(0)';
-                addToOrderBtn.style.boxShadow = '0 2px 8px rgba(40, 167, 69, 0.3)';
-            };
-            addToOrderBtn.onclick = addCurrentInstrumentToOrder;
-            document.body.appendChild(addToOrderBtn);
+            // Page initialization without add to order button
         });
     </script>
 </body>

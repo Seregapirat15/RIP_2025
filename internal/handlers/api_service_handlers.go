@@ -164,6 +164,13 @@ func AddServiceToOrderHandler(w http.ResponseWriter, r *http.Request) {
 	err = database.AddServiceToOrder(orderService)
 	if err != nil {
 		log.Printf("Ошибка добавления услуги в заявку: %v", err)
+		
+		// Проверяем, является ли ошибка дубликатом
+		if err.Error() == "услуга уже добавлена в заявку" {
+			http.Error(w, "Эта услуга уже добавлена в заявку", http.StatusConflict)
+			return
+		}
+		
 		http.Error(w, "Ошибка добавления услуги в заявку", http.StatusInternalServerError)
 		return
 	}
@@ -172,6 +179,7 @@ func AddServiceToOrderHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"order_id": order.ID,
 		"service_id": orderService.ServiceID,
+		"message": "Услуга успешно добавлена в заявку",
 	})
 }
 
