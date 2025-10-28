@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"lab2/internal/database"
+	"lab4/internal/database"
 )
 
 // AstronomicalTelescopeInstrumentsHandler обрабатывает главную страницу со списком инструментов

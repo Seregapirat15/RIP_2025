@@ -8,7 +8,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"lab2/pkg/config"
+	"lab4/pkg/config"
 )
 
 // MinIOTelescopeImagesClient представляет клиент MinIO для хранения изображений телескопов

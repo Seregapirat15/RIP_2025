@@ -8,7 +8,7 @@ import (
 	"mime/multipart"
 	"time"
 
-	"lab2/internal/models"
+	"lab4/internal/models"
 )
 
 // === УСЛУГИ ===
@@ -566,11 +566,11 @@ func GetUserByID(id int) (*models.User, error) {
 
 // GetUserByLogin получает пользователя по логину
 func GetUserByLogin(login string) (*models.User, error) {
-	query := `SELECT id, login, email, first_name, last_name, role, is_active, created_at FROM users WHERE login = $1`
+	query := `SELECT id, login, email, password_hash, first_name, last_name, role, is_active, created_at FROM users WHERE login = $1`
 	
 	var user models.User
 	err := PostgreSQLConnection.QueryRow(query, login).Scan(
-		&user.ID, &user.Login, &user.Email, &user.FirstName, &user.LastName, &user.Role, &user.IsActive, &user.CreatedAt)
+		&user.ID, &user.Login, &user.Email, &user.PasswordHash, &user.FirstName, &user.LastName, &user.Role, &user.IsActive, &user.CreatedAt)
 	
 	if err != nil {
 		return nil, err

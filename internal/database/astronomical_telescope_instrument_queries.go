@@ -1,7 +1,7 @@
 package database
 
 import (
-	"lab2/internal/models"
+	"lab4/internal/models"
 )
 
 // GetAstronomicalTelescopeInstruments получает все активные астрономические инструменты

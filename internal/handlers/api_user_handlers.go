@@ -4,33 +4,65 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
-	"lab2/internal/database"
-	"lab2/internal/models"
+	"lab4/internal/auth"
+	"lab4/internal/database"
+	"lab4/internal/middleware"
+	"lab4/internal/models"
 )
+
+// RegisterUserRequest представляет запрос на регистрацию
+type RegisterUserRequest struct {
+	Login     string `json:"login"`
+	Password  string `json:"password"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Role      string `json:"role"`
+}
 
 // RegisterUserHandler - POST /api/users/register - регистрация пользователя
 func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var req RegisterUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Неверный JSON", http.StatusBadRequest)
 		return
 	}
 	
 	// Валидация обязательных полей
-	if user.Login == "" || user.Email == "" || user.FirstName == "" || user.LastName == "" {
+	if req.Login == "" || req.Password == "" || req.Email == "" || req.FirstName == "" || req.LastName == "" {
 		http.Error(w, "Заполните все обязательные поля", http.StatusBadRequest)
 		return
 	}
 	
+	// Хешируем пароль
+	hashedPassword, err := auth.HashPassword(req.Password)
+	if err != nil {
+		log.Printf("Ошибка хеширования пароля: %v", err)
+		http.Error(w, "Ошибка обработки пароля", http.StatusInternalServerError)
+		return
+	}
+	
 	// Устанавливаем системные поля
-	user.CreatedAt = time.Now()
-	user.IsActive = true
-	user.Role = "user" // По умолчанию пользователь
+	user := models.User{
+		Login:        req.Login,
+		Email:        req.Email,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
+		PasswordHash: hashedPassword,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		IsActive:     true,
+		Role:         "user", // По умолчанию пользователь
+	}
+	
+	// Если указана роль, используем её
+	if req.Role != "" {
+		user.Role = req.Role
+	}
 	
 	userID, err := database.CreateUser(user)
 	if err != nil {
@@ -40,6 +72,9 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	user.ID = userID
+	// Не возвращаем хеш пароля
+	user.PasswordHash = ""
+	
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
@@ -48,8 +83,12 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	// В реальном приложении ID пользователя получается из токена
-	userID := FIXED_CREATOR_ID
+	// Получаем ID пользователя из контекста (установлен middleware)
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		return
+	}
 	
 	user, err := database.GetUserByID(userID)
 	if err != nil {
@@ -58,6 +97,9 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	// Не возвращаем хеш пароля
+	user.PasswordHash = ""
+	
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -65,8 +107,12 @@ func GetUserHandler(w http.ResponseWriter, r *http.Request) {
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	// В реальном приложении ID пользователя получается из токена
-	userID := FIXED_CREATOR_ID
+	// Получаем ID пользователя из контекста
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		return
+	}
 	
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -74,17 +120,29 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Запрещаем изменение системных полей
-	user.ID = userID
-	user.CreatedAt = time.Now() // Сохраняем оригинальную дату
-	user.Role = "creator"       // Сохраняем оригинальную роль
+	// Получаем текущего пользователя для сохранения системных полей
+	currentUser, err := database.GetUserByID(userID)
+	if err != nil {
+		http.Error(w, "Пользователь не найден", http.StatusNotFound)
+		return
+	}
 	
-	err := database.UpdateUser(user)
+	// Обновляем только разрешенные поля
+	user.ID = userID
+	user.CreatedAt = currentUser.CreatedAt // Сохраняем оригинальную дату
+	user.UpdatedAt = time.Now()
+	user.Role = currentUser.Role // Сохраняем оригинальную роль
+	user.PasswordHash = currentUser.PasswordHash // Сохраняем хеш пароля
+	
+	err = database.UpdateUser(user)
 	if err != nil {
 		log.Printf("Ошибка обновления пользователя: %v", err)
 		http.Error(w, "Ошибка обновления пользователя", http.StatusInternalServerError)
 		return
 	}
+	
+	// Не возвращаем хеш пароля
+	user.PasswordHash = ""
 	
 	json.NewEncoder(w).Encode(user)
 }
@@ -103,17 +161,40 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// В реальном приложении здесь проверка пароля
+	// Получаем пользователя по логину
 	user, err := database.GetUserByLogin(credentials.Login)
 	if err != nil {
 		http.Error(w, "Неверные учетные данные", http.StatusUnauthorized)
 		return
 	}
 	
-	// В реальном приложении здесь генерация JWT токена
+	// Проверяем пароль
+	if !auth.CheckPasswordHash(credentials.Password, user.PasswordHash) {
+		http.Error(w, "Неверные учетные данные", http.StatusUnauthorized)
+		return
+	}
+	
+	// Проверяем, что пользователь активен
+	if !user.IsActive {
+		http.Error(w, "Аккаунт заблокирован", http.StatusUnauthorized)
+		return
+	}
+	
+	// Генерируем JWT токен
+	token, err := auth.GenerateToken(user.ID, user.Role, user.Login)
+	if err != nil {
+		log.Printf("Ошибка генерации токена: %v", err)
+		http.Error(w, "Ошибка авторизации", http.StatusInternalServerError)
+		return
+	}
+	
+	// Не возвращаем хеш пароля
+	user.PasswordHash = ""
+	
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"user": user,
-		"token": "fake-jwt-token-" + strconv.Itoa(user.ID),
+		"token": token,
+		"message": "Успешная авторизация",
 	})
 }
 

@@ -8,16 +8,24 @@ import (
 	"strings"
 	"time"
 
-	"lab2/internal/database"
-	"lab2/internal/models"
+	"lab4/internal/database"
+	"lab4/internal/middleware"
+	"lab4/internal/models"
 )
 
 // GetCartIconHandler - GET /api/orders/cart - иконка корзины
 func GetCartIconHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
+	// Получаем ID пользователя из контекста
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		return
+	}
+	
 	// Получаем заявку-черновик пользователя
-	order, err := database.GetDraftOrder(FIXED_CREATOR_ID)
+	order, err := database.GetDraftOrder(userID)
 	if err != nil {
 		// Если заявки нет, возвращаем пустую корзину
 		json.NewEncoder(w).Encode(models.CartIcon{
@@ -46,6 +54,53 @@ func GetCartIconHandler(w http.ResponseWriter, r *http.Request) {
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
+	// Получаем ID пользователя из контекста
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		return
+	}
+	
+	// Получаем роль пользователя
+	userRole, _ := middleware.GetUserRole(r.Context())
+	
+	// Парсинг параметров фильтрации
+	filter := models.OrderFilter{
+		Status: r.URL.Query().Get("status"),
+	}
+	
+	// Если пользователь не модератор, показываем только его заявки
+	if userRole != "moderator" && userRole != "admin" {
+		filter.CreatorID = &userID
+	}
+	
+	// Парсинг дат
+	if formationFrom := r.URL.Query().Get("formation_from"); formationFrom != "" {
+		if t, err := time.Parse("2006-01-02", formationFrom); err == nil {
+			filter.FormationFrom = &t
+		}
+	}
+	
+	if formationTo := r.URL.Query().Get("formation_to"); formationTo != "" {
+		if t, err := time.Parse("2006-01-02", formationTo); err == nil {
+			filter.FormationTo = &t
+		}
+	}
+	
+	orders, err := database.GetOrdersWithFilter(filter)
+	if err != nil {
+		log.Printf("Ошибка получения заявок: %v", err)
+		http.Error(w, "Ошибка получения заявок", http.StatusInternalServerError)
+		return
+	}
+	
+	json.NewEncoder(w).Encode(orders)
+}
+
+// GetAllOrdersHandler - GET /api/admin/orders - все заявки для модератора
+func GetAllOrdersHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
 	// Парсинг параметров фильтрации
 	filter := models.OrderFilter{
 		Status: r.URL.Query().Get("status"),
@@ -64,6 +119,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	
+	// Модератор видит все заявки (без фильтра по создателю)
 	orders, err := database.GetOrdersWithFilter(filter)
 	if err != nil {
 		log.Printf("Ошибка получения заявок: %v", err)

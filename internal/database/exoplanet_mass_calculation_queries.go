@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"lab2/internal/models"
+	"lab4/internal/models"
 )
 
 // GetCurrentExoplanetMassCalculation получает текущую заявку (статус "черновик")

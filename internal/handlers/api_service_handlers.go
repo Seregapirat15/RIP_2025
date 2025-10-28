@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"lab2/internal/database"
-	"lab2/internal/models"
+	"lab4/internal/database"
+	"lab4/internal/middleware"
+	"lab4/internal/models"
 )
 
 // Константа для зафиксированного пользователя-создателя
@@ -146,6 +147,13 @@ func DeleteServiceHandler(w http.ResponseWriter, r *http.Request) {
 func AddServiceToOrderHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
+	// Получаем ID пользователя из контекста
+	userID, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
+		return
+	}
+	
 	var orderService models.OrderService
 	if err := json.NewDecoder(r.Body).Decode(&orderService); err != nil {
 		http.Error(w, "Неверный JSON", http.StatusBadRequest)
@@ -153,7 +161,7 @@ func AddServiceToOrderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Получаем или создаем заявку-черновик
-	order, err := database.GetOrCreateDraftOrder(FIXED_CREATOR_ID)
+	order, err := database.GetOrCreateDraftOrder(userID)
 	if err != nil {
 		log.Printf("Ошибка получения/создания заявки: %v", err)
 		http.Error(w, "Ошибка работы с заявкой", http.StatusInternalServerError)

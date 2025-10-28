@@ -1,0 +1,573 @@
+{
+	"info": {
+		"_postman_id": "telescope-api-collection",
+		"name": "Telescope Services API - Lab 4",
+		"description": "Коллекция для тестирования API системы управления телескопами с авторизацией",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Авторизация",
+			"item": [
+				{
+					"name": "Регистрация пользователя",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"test@example.com\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Создание нового пользователя в системе"
+					},
+					"response": []
+				},
+				{
+					"name": "Вход в систему",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.token) {",
+									"        pm.environment.set('auth_token', responseJson.token);",
+									"        console.log('JWT токен сохранен:', responseJson.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Аутентификация пользователя и получение JWT токена"
+					},
+					"response": []
+				},
+				{
+					"name": "Регистрация модератора",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"moderator\",\n  \"password\": \"modpass123\",\n  \"email\": \"mod@example.com\",\n  \"first_name\": \"Moderator\",\n  \"last_name\": \"User\",\n  \"role\": \"moderator\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Создание модератора для тестирования ролей"
+					},
+					"response": []
+				},
+				{
+					"name": "Вход модератора",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.token) {",
+									"        pm.environment.set('moderator_token', responseJson.token);",
+									"        console.log('JWT токен модератора сохранен:', responseJson.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"moderator\",\n  \"password\": \"modpass123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Вход модератора для получения токена"
+					},
+					"response": []
+				},
+				{
+					"name": "Получение данных пользователя",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Получение данных текущего пользователя"
+					},
+					"response": []
+				}
+			],
+			"description": "Эндпоинты для авторизации и аутентификации"
+		},
+		{
+			"name": "Публичные услуги",
+			"item": [
+				{
+					"name": "Получение списка услуг",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/services",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"services"
+							]
+						},
+						"description": "Получение списка доступных телескопов (публичный endpoint)"
+					},
+					"response": []
+				},
+				{
+					"name": "Получение одной услуги",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/services/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"services",
+								"3"
+							]
+						},
+						"description": "Получение детальной информации об услуге"
+					},
+					"response": []
+				}
+			],
+			"description": "Публичные эндпоинты для получения информации об услугах"
+		},
+		{
+			"name": "Заявки (требуют авторизации)",
+			"item": [
+				{
+					"name": "Получение корзины",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"cart"
+							]
+						},
+						"description": "Получение текущей корзины пользователя"
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление услуги в заявку",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"service_id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/services",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"services"
+							]
+						},
+						"description": "Добавление телескопа в черновую заявку"
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка заявок пользователя",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Получение списка заявок текущего пользователя"
+					},
+					"response": []
+				},
+				{
+					"name": "Получение одной заявки",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/orders/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"1"
+							]
+						},
+						"description": "Получение детальной информации о заявке"
+					},
+					"response": []
+				},
+				{
+					"name": "Формирование заявки",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"exoplanet_name\": \"Тестовая экзопланета\",\n  \"star_mass\": 1.0,\n  \"orbital_period\": 365.0,\n  \"velocity_amplitude\": 10.0,\n  \"inclination\": 90.0,\n  \"eccentricity\": 0.0,\n  \"comment\": \"Тестовая заявка для демонстрации\",\n  \"other_info\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/form",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"1",
+								"form"
+							]
+						},
+						"description": "Формирование заявки из черновика"
+					},
+					"response": []
+				}
+			],
+			"description": "Эндпоинты для работы с заявками (требуют авторизации)"
+		},
+		{
+			"name": "Административные функции (только модераторы)",
+			"item": [
+				{
+					"name": "Получение всех заявок (модератор)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{moderator_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"orders"
+							]
+						},
+						"description": "Получение всех заявок (доступно только модераторам)"
+					},
+					"response": []
+				},
+				{
+					"name": "Завершение заявки (модератор)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{moderator_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"завершён\",\n  \"completion_date\": \"2025-10-28T13:00:00Z\",\n  \"comment\": \"Заявка успешно обработана модератором\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"1",
+								"complete"
+							]
+						},
+						"description": "Завершение заявки модератором"
+					},
+					"response": []
+				}
+			],
+			"description": "Административные функции доступные только модераторам"
+		},
+		{
+			"name": "Тестирование без авторизации",
+			"item": [
+				{
+					"name": "Попытка получить заявки без токена",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Ожидается 401 Unauthorized"
+					},
+					"response": []
+				},
+				{
+					"name": "Попытка добавить услугу без токена",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"service_id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/services",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"services"
+							]
+						},
+						"description": "Ожидается 401 Unauthorized"
+					},
+					"response": []
+				},
+				{
+					"name": "Попытка завершить заявку как обычный пользователь",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"завершён\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders/1/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders",
+								"1",
+								"complete"
+							]
+						},
+						"description": "Ожидается 403 Forbidden (только модераторы могут завершать)"
+					},
+					"response": []
+				}
+			],
+			"description": "Тесты для проверки авторизации и ролей"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "moderator_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

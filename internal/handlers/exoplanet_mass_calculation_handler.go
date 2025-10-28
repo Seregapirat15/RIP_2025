@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"lab2/internal/database"
-	"lab2/internal/models"
+	"lab4/internal/database"
+	"lab4/internal/models"
 )
 
 // getInstrumentAccuracy рассчитывает точность инструмента на основе его характеристик

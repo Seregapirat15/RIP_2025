@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"lab2/internal/database"
-	"lab2/internal/models"
+	"lab4/internal/database"
+	"lab4/internal/models"
 )
 
 // DeleteOrderServiceHandler - DELETE /api/orders/{order_id}/services/{service_id} - удаление услуги из заявки

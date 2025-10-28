@@ -6,7 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"lab2/pkg/config"
+	"lab4/pkg/config"
 )
 
 // PostgreSQLConnection представляет подключение к PostgreSQL

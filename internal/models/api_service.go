@@ -92,7 +92,8 @@ type ServiceFilter struct {
 
 // OrderFilter представляет фильтр для заявок
 type OrderFilter struct {
-	Status        string    `json:"status"`         // сформирован, завершён, отклонён
+	Status        string     `json:"status"`         // сформирован, завершён, отклонён
+	CreatorID     *int       `json:"creator_id"`     // ID создателя (для фильтрации по пользователю)
 	FormationFrom *time.Time `json:"formation_from"` // Дата формирования от
 	FormationTo   *time.Time `json:"formation_to"`   // Дата формирования до
 }

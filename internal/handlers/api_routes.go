@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"lab4/internal/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -11,34 +12,56 @@ func SetupAPIRoutes(r *mux.Router) {
 	// Создаем подроутер для API
 	api := r.PathPrefix("/api").Subrouter()
 	
-	// === УСЛУГИ ===
+	// === ПУБЛИЧНЫЕ УСЛУГИ (доступно всем) ===
 	api.HandleFunc("/services", GetServicesHandler).Methods("GET")                    // 1. GET список услуг с фильтрацией
 	api.HandleFunc("/services/{id}", GetServiceHandler).Methods("GET")               // 2. GET одна услуга
-	api.HandleFunc("/services", CreateServiceHandler).Methods("POST")               // 3. POST добавление услуги
-	api.HandleFunc("/services/{id}", UpdateServiceHandler).Methods("PUT")          // 4. PUT изменение услуги
-	api.HandleFunc("/services/{id}", DeleteServiceHandler).Methods("DELETE")        // 5. DELETE удаление услуги
-	api.HandleFunc("/services/{id}/image", UploadServiceImageHandler).Methods("POST") // 6. POST добавление изображения
 	
-	// === ЗАЯВКИ ===
-	api.HandleFunc("/orders/cart", GetCartIconHandler).Methods("GET")              // 7. GET иконка корзины
-	api.HandleFunc("/orders", GetOrdersHandler).Methods("GET")                      // 8. GET список заявок с фильтрацией
-	api.HandleFunc("/orders/{id}", GetOrderHandler).Methods("GET")                  // 9. GET одна заявка с услугами
-	api.HandleFunc("/orders/{id}", UpdateOrderHandler).Methods("PUT")                // 10. PUT изменение заявки
-	api.HandleFunc("/orders/{id}/form", FormOrderHandler).Methods("PUT")            // 11. PUT сформировать заявку
-	api.HandleFunc("/orders/{id}/complete", CompleteOrderHandler).Methods("PUT")    // 12. PUT завершить/отклонить заявку
-	api.HandleFunc("/orders/{id}", DeleteOrderHandler).Methods("DELETE")            // 13. DELETE удаление заявки
+	// === АВТОРИЗАЦИЯ (публичные) ===
+	api.HandleFunc("/auth/register", RegisterUserHandler).Methods("POST")             // Регистрация
+	api.HandleFunc("/auth/login", LoginUserHandler).Methods("POST")                   // Вход
+	api.HandleFunc("/auth/logout", LogoutUserHandler).Methods("POST")                 // Выход
 	
-	// === СВЯЗИ ЗАЯВКА-УСЛУГА ===
-	api.HandleFunc("/orders/services", AddServiceToOrderHandler).Methods("POST")    // 14. POST добавление услуги в заявку
-	api.HandleFunc("/orders/{order_id}/services/{service_id}", DeleteOrderServiceHandler).Methods("DELETE") // 15. DELETE удаление услуги из заявки
-	api.HandleFunc("/orders/{order_id}/services/{service_id}", UpdateOrderServiceHandler).Methods("PUT") // 16. PUT изменение связи м-м
+	// === ВРЕМЕННО ПУБЛИЧНЫЕ (для демонстрации) ===
+	api.HandleFunc("/orders/cart", GetCartIconHandler).Methods("GET")                 // Иконка корзины
+	api.HandleFunc("/orders/services", AddServiceToOrderHandler).Methods("POST")      // Добавление услуги
 	
-	// === ПОЛЬЗОВАТЕЛИ ===
-	api.HandleFunc("/users/register", RegisterUserHandler).Methods("POST")          // 17. POST регистрация пользователя
-	api.HandleFunc("/users/me", GetUserHandler).Methods("GET")                      // 18. GET данные пользователя
-	api.HandleFunc("/users/me", UpdateUserHandler).Methods("PUT")                  // 19. PUT обновление пользователя
-	api.HandleFunc("/users/login", LoginUserHandler).Methods("POST")               // 20. POST аутентификация
-	api.HandleFunc("/users/logout", LogoutUserHandler).Methods("POST")             // 21. POST деавторизация
+	// === ЗАЩИЩЕННЫЕ МАРШРУТЫ (требуют авторизации) ===
+	protected := api.PathPrefix("").Subrouter()
+	protected.Use(middleware.AuthMiddleware)
+	
+	// Пользовательские данные
+	protected.HandleFunc("/auth/me", GetUserHandler).Methods("GET")                   // Данные пользователя
+	protected.HandleFunc("/auth/me", UpdateUserHandler).Methods("PUT")               // Обновление пользователя
+	
+	// Корзина и заявки пользователя
+	protected.HandleFunc("/orders/cart", GetCartIconHandler).Methods("GET")          // Иконка корзины
+	protected.HandleFunc("/orders", GetOrdersHandler).Methods("GET")                // Список заявок пользователя
+	protected.HandleFunc("/orders/{id}", GetOrderHandler).Methods("GET")             // Одна заявка
+	protected.HandleFunc("/orders/{id}", UpdateOrderHandler).Methods("PUT")         // Изменение заявки
+	protected.HandleFunc("/orders/{id}/form", FormOrderHandler).Methods("PUT")       // Формирование заявки
+	protected.HandleFunc("/orders/{id}", DeleteOrderHandler).Methods("DELETE")      // Удаление заявки
+	
+	// Добавление услуг в заявку
+	protected.HandleFunc("/orders/services", AddServiceToOrderHandler).Methods("POST") // Добавление услуги
+	protected.HandleFunc("/orders/{order_id}/services/{service_id}", DeleteOrderServiceHandler).Methods("DELETE") // Удаление услуги
+	protected.HandleFunc("/orders/{order_id}/services/{service_id}", UpdateOrderServiceHandler).Methods("PUT") // Изменение связи
+	
+	// === АДМИНИСТРАТОРСКИЕ МАРШРУТЫ (только для модераторов) ===
+	admin := api.PathPrefix("").Subrouter()
+	admin.Use(middleware.AuthMiddleware)
+	admin.Use(middleware.RequireModerator)
+	
+	// Управление услугами
+	admin.HandleFunc("/services", CreateServiceHandler).Methods("POST")               // Создание услуги
+	admin.HandleFunc("/services/{id}", UpdateServiceHandler).Methods("PUT")         // Изменение услуги
+	admin.HandleFunc("/services/{id}", DeleteServiceHandler).Methods("DELETE")      // Удаление услуги
+	admin.HandleFunc("/services/{id}/image", UploadServiceImageHandler).Methods("POST") // Загрузка изображения
+	
+	// Завершение заявок (только модераторы)
+	admin.HandleFunc("/orders/{id}/complete", CompleteOrderHandler).Methods("PUT")    // Завершение заявки
+	
+	// Все заявки для модераторов
+	admin.HandleFunc("/admin/orders", GetAllOrdersHandler).Methods("GET")             // Все заявки для модератора
 	
 	// CORS middleware
 	api.Use(corsMiddleware)

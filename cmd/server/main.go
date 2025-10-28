@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"lab2/internal/database"
-	"lab2/internal/handlers"
-	"lab2/pkg/config"
+	"lab4/internal/database"
+	"lab4/internal/handlers"
+	"lab4/pkg/config"
 )
 
 func main() {
@@ -37,6 +37,9 @@ func main() {
 	// Статические файлы
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
+	// Swagger документация
+	handlers.SetupSwaggerRoutes(r)
+
 	// Маршруты
 	// Веб-интерфейс (старые маршруты)
 	r.HandleFunc("/", handlers.AstronomicalTelescopeInstrumentsHandler).Methods("GET")
@@ -48,7 +51,8 @@ func main() {
 	// API маршруты
 	handlers.SetupAPIRoutes(r)
 
-	fmt.Println("Сервер системы расчета массы экзопланет запущен на http://localhost:8081")
+	fmt.Println("Сервер системы управления телескопами запущен на http://localhost:8081")
+	fmt.Println("Swagger документация доступна на: http://localhost:8081/swagger/")
 	fmt.Println("PostgreSQL подключен к:", cfg.DBHost+":"+fmt.Sprintf("%d", cfg.DBPort))
 	fmt.Println("MinIO подключен к:", cfg.MinIOEndpoint)
 	fmt.Println("Adminer доступен на: http://localhost:8080")
