@@ -131,18 +131,24 @@
                 
             } catch (error) {
                 console.error('Error adding instrument to order:', error);
+                console.error('Error status:', error.status);
+                console.error('Error message:', error.message);
                 
                 // Handle different types of errors
                 let errorMessage = 'Ошибка при добавлении инструмента';
                 
-                if (error.status === 409) {
+                if (error.status === 401) {
+                    errorMessage = 'Требуется авторизация. Пожалуйста, войдите в систему.';
+                } else if (error.status === 409) {
                     errorMessage = 'Этот инструмент уже добавлен в заявку';
                 } else if (error.status === 400) {
                     errorMessage = 'Некорректные данные для добавления';
                 } else if (error.status === 500) {
                     errorMessage = 'Серверная ошибка. Попробуйте позже';
                 } else if (error.status >= 400) {
-                    errorMessage = 'Ошибка соединения с сервером';
+                    errorMessage = `Ошибка сервера (${error.status}). Проверьте подключение к интернету.`;
+                } else if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Ошибка соединения с сервером. Проверьте подключение к интернету.';
                 }
                 
                 showMessage(errorMessage, 'error');

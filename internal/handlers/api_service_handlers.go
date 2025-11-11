@@ -147,12 +147,18 @@ func DeleteServiceHandler(w http.ResponseWriter, r *http.Request) {
 func AddServiceToOrderHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
+	// Логируем запрос для отладки
+	log.Printf("AddServiceToOrderHandler: Method=%s, Path=%s, AuthHeader=%s", r.Method, r.URL.Path, r.Header.Get("Authorization"))
+	
 	// Получаем ID пользователя из контекста
 	userID, ok := middleware.GetUserID(r.Context())
 	if !ok {
+		log.Printf("AddServiceToOrderHandler: Пользователь не авторизован")
 		http.Error(w, "Пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
+	
+	log.Printf("AddServiceToOrderHandler: Пользователь авторизован, userID=%d", userID)
 	
 	var orderService models.OrderService
 	if err := json.NewDecoder(r.Body).Decode(&orderService); err != nil {

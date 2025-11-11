@@ -12,14 +12,19 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		
+		// Логируем для отладки
+		// log.Printf("AuthMiddleware: Path=%s, Method=%s, AuthHeader=%s", r.URL.Path, r.Method, authHeader)
+		
 		tokenString, err := auth.ExtractTokenFromHeader(authHeader)
 		if err != nil {
+			// log.Printf("AuthMiddleware: Ошибка извлечения токена: %v", err)
 			http.Error(w, "Требуется авторизация", http.StatusUnauthorized)
 			return
 		}
 
 		claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
+			// log.Printf("AuthMiddleware: Ошибка валидации токена: %v", err)
 			http.Error(w, "Неверный токен", http.StatusUnauthorized)
 			return
 		}

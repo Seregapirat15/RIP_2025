@@ -21,10 +21,6 @@ func SetupAPIRoutes(r *mux.Router) {
 	api.HandleFunc("/auth/login", LoginUserHandler).Methods("POST")                   // Вход
 	api.HandleFunc("/auth/logout", LogoutUserHandler).Methods("POST")                 // Выход
 	
-	// === ВРЕМЕННО ПУБЛИЧНЫЕ (для демонстрации) ===
-	api.HandleFunc("/orders/cart", GetCartIconHandler).Methods("GET")                 // Иконка корзины
-	api.HandleFunc("/orders/services", AddServiceToOrderHandler).Methods("POST")      // Добавление услуги
-	
 	// === ЗАЩИЩЕННЫЕ МАРШРУТЫ (требуют авторизации) ===
 	protected := api.PathPrefix("").Subrouter()
 	protected.Use(middleware.AuthMiddleware)
