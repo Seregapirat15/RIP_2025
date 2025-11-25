@@ -2,37 +2,62 @@ package middleware
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"lab4/internal/auth"
+	"lab4/internal/session"
 )
 
-// AuthMiddleware проверяет JWT токен в заголовке Authorization
+// AuthMiddleware проверяет JWT токен в заголовке Authorization или сессию в куки
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var userID int
+		var role string
+		var login string
+		var authenticated bool
+
+		// Приоритет 1: Проверяем JWT токен в заголовке Authorization
 		authHeader := r.Header.Get("Authorization")
-		
-		// Логируем для отладки
-		// log.Printf("AuthMiddleware: Path=%s, Method=%s, AuthHeader=%s", r.URL.Path, r.Method, authHeader)
-		
-		tokenString, err := auth.ExtractTokenFromHeader(authHeader)
-		if err != nil {
-			// log.Printf("AuthMiddleware: Ошибка извлечения токена: %v", err)
+		if authHeader != "" {
+			tokenString, err := auth.ExtractTokenFromHeader(authHeader)
+			if err == nil {
+				claims, err := auth.ValidateToken(tokenString)
+				if err == nil {
+					userID = claims.UserID
+					role = claims.Role
+					login = claims.Login
+					authenticated = true
+					log.Printf("AuthMiddleware: Авторизация через JWT, user_id=%d", userID)
+				}
+			}
+		}
+
+		// Приоритет 2: Если JWT не найден, проверяем сессию в куки
+		if !authenticated {
+			cookie, err := r.Cookie("session_id")
+			if err == nil && cookie != nil {
+				sessionData, err := session.GetSession(cookie.Value)
+				if err == nil {
+					userID = sessionData.UserID
+					role = sessionData.Role
+					login = sessionData.Login
+					authenticated = true
+					log.Printf("AuthMiddleware: Авторизация через куки, session_id=%s, user_id=%d", cookie.Value, userID)
+				}
+			}
+		}
+
+		// Если не авторизован ни одним способом
+		if !authenticated {
 			http.Error(w, "Требуется авторизация", http.StatusUnauthorized)
 			return
 		}
 
-		claims, err := auth.ValidateToken(tokenString)
-		if err != nil {
-			// log.Printf("AuthMiddleware: Ошибка валидации токена: %v", err)
-			http.Error(w, "Неверный токен", http.StatusUnauthorized)
-			return
-		}
-
 		// Добавляем информацию о пользователе в контекст
-		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
-		ctx = context.WithValue(ctx, "user_role", claims.Role)
-		ctx = context.WithValue(ctx, "user_login", claims.Login)
+		ctx := context.WithValue(r.Context(), "user_id", userID)
+		ctx = context.WithValue(ctx, "user_role", role)
+		ctx = context.WithValue(ctx, "user_login", login)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

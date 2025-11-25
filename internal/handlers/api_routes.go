@@ -59,6 +59,9 @@ func SetupAPIRoutes(r *mux.Router) {
 	// Все заявки для модераторов
 	admin.HandleFunc("/admin/orders", GetAllOrdersHandler).Methods("GET")             // Все заявки для модератора
 	
+	// Просмотр сессий (для отладки, доступно всем авторизованным)
+	protected.HandleFunc("/admin/sessions", GetSessionsHandler).Methods("GET")        // Просмотр всех сессий
+	
 	// CORS middleware
 	api.Use(corsMiddleware)
 }

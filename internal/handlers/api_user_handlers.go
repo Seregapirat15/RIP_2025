@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"lab4/internal/auth"
 	"lab4/internal/database"
 	"lab4/internal/middleware"
 	"lab4/internal/models"
+	"lab4/internal/session"
 )
 
 // RegisterUserRequest представляет запрос на регистрацию
@@ -147,7 +149,7 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-// LoginUserHandler - POST /api/users/login - аутентификация
+// LoginUserHandler - POST /api/auth/login - аутентификация
 func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
@@ -188,21 +190,64 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
+	// Создаем сессию в Redis
+	sessionID := uuid.New().String()
+	sessionData := session.SessionData{
+		UserID: user.ID,
+		Role:   user.Role,
+		Login:  user.Login,
+	}
+	
+	// Сохраняем сессию на 24 часа
+	err = session.CreateSession(sessionID, sessionData, 24*time.Hour)
+	if err != nil {
+		log.Printf("Ошибка создания сессии в Redis: %v", err)
+		// Не прерываем авторизацию, если Redis недоступен
+	} else {
+		// Устанавливаем куки с session_id
+		cookie := &http.Cookie{
+			Name:     "session_id",
+			Value:    sessionID,
+			Path:     "/",
+			MaxAge:   86400, // 24 часа в секундах
+			HttpOnly: true,  // Защита от XSS
+			SameSite: http.SameSiteLaxMode,
+		}
+		http.SetCookie(w, cookie)
+		log.Printf("Создана сессия в Redis: session_id=%s, user_id=%d", sessionID, user.ID)
+	}
+	
 	// Не возвращаем хеш пароля
 	user.PasswordHash = ""
 	
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"user": user,
-		"token": token,
+		"user":    user,
+		"token":   token,
 		"message": "Успешная авторизация",
 	})
 }
 
-// LogoutUserHandler - POST /api/users/logout - деавторизация
+// LogoutUserHandler - POST /api/auth/logout - деавторизация
 func LogoutUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
-	// В реальном приложении здесь инвалидация токена
+	// Получаем session_id из куки
+	cookie, err := r.Cookie("session_id")
+	if err == nil && cookie != nil {
+		// Удаляем сессию из Redis
+		err = session.DeleteSession(cookie.Value)
+		if err != nil {
+			log.Printf("Ошибка удаления сессии из Redis: %v", err)
+		} else {
+			log.Printf("Удалена сессия из Redis: session_id=%s", cookie.Value)
+		}
+		
+		// Удаляем куки
+		cookie.MaxAge = -1
+		cookie.Path = "/"
+		http.SetCookie(w, cookie)
+	}
+	
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Успешный выход из системы",
 	})

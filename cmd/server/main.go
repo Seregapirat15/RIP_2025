@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"lab4/internal/database"
 	"lab4/internal/handlers"
+	"lab4/internal/session"
 	"lab4/pkg/config"
 )
 
@@ -29,6 +30,14 @@ func main() {
 	err = database.InitMinIOTelescopeImagesConnection(cfg)
 	if err != nil {
 		log.Fatal("Ошибка подключения к MinIO:", err)
+	}
+
+	// Инициализация Redis для сессий
+	err = session.InitRedis()
+	if err != nil {
+		log.Printf("Предупреждение: Redis недоступен: %v. Сессии будут работать только через JWT.", err)
+	} else {
+		log.Println("Redis подключен для хранения сессий")
 	}
 
 	// Настройка роутера
@@ -55,6 +64,7 @@ func main() {
 	fmt.Println("Swagger документация доступна на: http://localhost:8081/swagger/")
 	fmt.Println("PostgreSQL подключен к:", cfg.DBHost+":"+fmt.Sprintf("%d", cfg.DBPort))
 	fmt.Println("MinIO подключен к:", cfg.MinIOEndpoint)
+	fmt.Println("Redis доступен на: localhost:6379")
 	fmt.Println("Adminer доступен на: http://localhost:8080")
 	fmt.Println("Доступные страницы:")
 	fmt.Println("  GET / - Список астрономических инструментов")
